@@ -1,4 +1,8 @@
-﻿Shader "Unity Shaders Book/Chapter 9/Forward Rendering" {
+﻿// Upgrade NOTE: replaced '_LightMatrix0' with 'unity_WorldToLight'
+// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Unity Shaders Book/Chapter 9/Forward Rendering" {
 	Properties {
 		_Diffuse ("Diffuse", Color) = (1, 1, 1, 1)
 		_Specular ("Specular", Color) = (1, 1, 1, 1)
@@ -9,12 +13,12 @@
 		
 		Pass {
 			// Pass for ambient light & first pixel light (directional light)
-			Tags { "LightMode"="ForwardBase" }
+//			Tags { "LightMode"="ForwardBase" }
 		
 			CGPROGRAM
 			
 			// Apparently need to add this declaration 
-			#pragma multi_compile_fwdbase	
+			// #pragma multi_compile_fwdbase	
 			
 			#pragma vertex vert
 			#pragma fragment frag
@@ -38,11 +42,10 @@
 			
 			v2f vert(a2v v) {
 				v2f o;
-				o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-				
+				o.pos = UnityObjectToClipPos(v.vertex);
 				o.worldNormal = UnityObjectToWorldNormal(v.normal);
 				
-				o.worldPos = mul(_Object2World, v.vertex).xyz;
+				o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
 				
 				return o;
 			}
@@ -69,7 +72,7 @@
 	
 		Pass {
 			// Pass for other pixel lights
-			Tags { "LightMode"="ForwardAdd" }
+//			Tags { "LightMode"="ForwardAdd" }
 			
 			Blend One One
 		
@@ -101,11 +104,11 @@
 			
 			v2f vert(a2v v) {
 				v2f o;
-				o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+				o.pos = UnityObjectToClipPos(v.vertex);
 				
 				o.worldNormal = UnityObjectToWorldNormal(v.normal);
 				
-				o.worldPos = mul(_Object2World, v.vertex).xyz;
+				o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
 				
 				return o;
 			}
@@ -128,10 +131,10 @@
 					fixed atten = 1.0;
 				#else
 					#if defined (POINT)
-				        float3 lightCoord = mul(_LightMatrix0, float4(i.worldPos, 1)).xyz;
+				        float3 lightCoord = mul(unity_WorldToLight, float4(i.worldPos, 1)).xyz;
 				        fixed atten = tex2D(_LightTexture0, dot(lightCoord, lightCoord).rr).UNITY_ATTEN_CHANNEL;
 				    #elif defined (SPOT)
-				        float4 lightCoord = mul(_LightMatrix0, float4(i.worldPos, 1));
+				        float4 lightCoord = mul(unity_WorldToLight, float4(i.worldPos, 1));
 				        fixed atten = (lightCoord.z > 0) * tex2D(_LightTexture0, lightCoord.xy / lightCoord.w + 0.5).w * tex2D(_LightTextureB0, dot(lightCoord, lightCoord).rr).UNITY_ATTEN_CHANNEL;
 				    #else
 				        fixed atten = 1.0;
