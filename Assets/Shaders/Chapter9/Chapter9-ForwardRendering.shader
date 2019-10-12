@@ -20,6 +20,8 @@ Shader "Unity Shaders Book/Chapter 9/Forward Rendering" {
 			// Apparently need to add this declaration 
 			// #pragma multi_compile_fwdbase	
 			
+			
+			
 			#pragma vertex vert
 			#pragma fragment frag
 			
